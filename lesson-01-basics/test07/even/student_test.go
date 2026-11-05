@@ -20,5 +20,16 @@ func TestIsEven(t *testing.T) {
 	//	}
 	//
 	// t.Error 报告失败但继续往下跑，t.Fatal 报告失败并立刻结束这个测试。
-	t.Fatal("TODO: 完成 TestIsEven")
+	if !IsEven(2) {
+		t.Error("IsEven(2) = false , want true")
+	}
+	if IsEven(3) {
+		t.Error("IsEven(3) = true , want false")
+	}
+	if !IsEven(0) {
+		t.Error("IsEven(0) = false , want true")
+	}
+	if !IsEven(-2) {
+		t.Error("IsEven(-2) = false , want true")
+	}
 }
