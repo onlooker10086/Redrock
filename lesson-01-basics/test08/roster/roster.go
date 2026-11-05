@@ -26,19 +26,21 @@ type Roster struct {
 func New() *Roster {
 	// TODO: 返回一个 *Roster。
 	// 切片的零值是 nil，可以直接 append，所以这里不需要预先分配。
-	return nil
+	return &Roster{}
 }
 
 // Add 把一条记录追加到名册末尾。
 // 名字两端的空白要先去掉：Add(Student{Name: " Lin "}) 存进去的是 "Lin"。
 func (r *Roster) Add(student Student) {
 	// TODO: 用 strings.TrimSpace 清理 student.Name，再 append 到 r.students。
+	student.Name = strings.TrimSpace(student.Name)
+	r.students = append(r.students, student)
 }
 
 // Len 返回名册里的记录条数。
 func (r *Roster) Len() int {
 	// TODO: 返回切片长度。
-	return 0
+	return len(r.students)
 }
 
 // Comparisons 返回「从名册里取出一条记录来比较」累计发生了多少次。
@@ -47,7 +49,7 @@ func (r *Roster) Len() int {
 // 我们要用它量出线性查找的代价到底是多少。
 func (r *Roster) Comparisons() int {
 	// TODO: 返回 r.comparisons。
-	return 0
+	return r.comparisons
 }
 
 // FindByID 按学号查找学生，找不到时第二个返回值为 false。
@@ -58,6 +60,12 @@ func (r *Roster) FindByID(id string) (Student, bool) {
 	// TODO: 用 for ... range 遍历 r.students。
 	// 每轮循环先给 r.comparisons 加 1，再判断 ID 是否相等。
 	// 相等就返回这条记录和 true；循环结束仍未找到就返回零值和 false。
+	for _, student := range r.students {
+		r.comparisons++
+		if student.ID == id {
+			return student, true
+		}
+	}
 	return Student{}, false
 }
 
@@ -67,7 +75,14 @@ func (r *Roster) FindByID(id string) (Student, bool) {
 // 同样要求：每检查一条记录，就把 r.comparisons 加 1。
 func (r *Roster) TotalScoreByName(name string) int {
 	// TODO: 遍历整份名册累加分数，记得同步累加 r.comparisons。
-	return 0
+	total := 0
+	for _, student := range r.students {
+		r.comparisons++
+		if student.Name == name {
+			total += student.Score
+		}
+	}
+	return total
 }
 
 // FormatText 把名册渲染成人看的纯文本，每行一条记录：
@@ -80,7 +95,9 @@ func FormatText(r *Roster) string {
 	var builder strings.Builder
 	// TODO: 遍历 r.students，用 fmt.Sprintf("%s %s %d\n", ...) 拼出每一行，
 	// 再用 builder.WriteString 写进去，最后 return builder.String()。
-	builder.WriteString(fmt.Sprintf("%d 条记录\n", r.Len()))
+	for _, student := range r.students {
+		builder.WriteString(fmt.Sprintf("%s %s %d\n", student.ID, student.Name, student.Score))
+	}
 	return builder.String()
 }
 
@@ -95,5 +112,9 @@ func FormatText(r *Roster) string {
 func FormatCSV(r *Roster) string {
 	var builder strings.Builder
 	// TODO: 先写表头，再遍历 r.students 写出每一行。
+	builder.WriteString("id,name,score\n")
+	for _, student := range r.students {
+		fmt.Fprintf(&builder, "%s,%s,%d\n", student.ID, student.Name, student.Score)
+	}
 	return builder.String()
 }
