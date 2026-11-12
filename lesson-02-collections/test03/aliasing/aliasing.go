@@ -12,7 +12,9 @@ func Head(values []int, n int) []int {
 	}
 	// BUG: 返回的窗口 cap 仍然延伸到 values 的末尾，
 	// 调用方一 append，就原地写进了 values[n]。
-	return values[:n]
+	res := make([]int, n)
+	copy(res, values[:n])
+	return res
 }
 
 // Branch 在同一个前缀 base 后面分别追加 a 和 b，返回两条互相独立的路径。
@@ -22,8 +24,8 @@ func Head(values []int, n int) []int {
 func Branch(base []string, a, b string) ([]string, []string) {
 	// BUG: base 的 cap 有富余时，两次 append 写的是同一个位置，
 	// 第二次会把第一次的结果覆盖掉。
-	left := append(base, a)
-	right := append(base, b)
+	left := append(append([]string(nil), base...), a)
+	right := append(append([]string(nil), base...), b)
 	return left, right
 }
 
@@ -33,12 +35,13 @@ func Branch(base []string, a, b string) ([]string, []string) {
 func RemoveIf(values []int, drop func(int) bool) []int {
 	// BUG 1: 边遍历边删除，删掉 i 之后下一个元素挪到了 i，却被 i++ 跳过。
 	// BUG 2: append(values[:i], values[i+1:]...) 是原地挪动，调用方的数据被改乱了。
-	for i := 0; i < len(values); i++ {
-		if drop(values[i]) {
-			values = append(values[:i], values[i+1:]...)
+	res := make([]int, 0)
+	for _, v := range values {
+		if !drop(v) {
+			res = append(res, v)
 		}
 	}
-	return values
+	return res
 }
 
 // Student 是一条名册记录。
@@ -53,8 +56,8 @@ type Student struct {
 func Pointers(students []Student) []*Student {
 	result := make([]*Student, 0, len(students))
 	// BUG: range 给出的 student 是元素的副本，&student 指向的是副本，不是切片里的那一格。
-	for _, student := range students {
-		result = append(result, &student)
+	for i := range students {
+		result = append(result, &students[i])
 	}
 	return result
 }
@@ -73,7 +76,7 @@ func Chunk(values []int, size int) [][]int {
 			end = len(values)
 		}
 		// BUG: 每一段的 cap 都延伸到 values 末尾，和后面几段共享同一块底层数组。
-		chunks = append(chunks, values[start:end])
+		chunks = append(chunks, append([]int(nil), values[start:end]...))
 	}
 	return chunks
 }
